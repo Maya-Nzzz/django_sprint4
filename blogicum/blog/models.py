@@ -35,6 +35,7 @@ class Location(PublishedModel, TitleModel, CreatedAtModel):
 
 class Post(PublishedModel, TitleModel, CreatedAtModel):
     text = models.TextField(verbose_name='Текст')
+    image = models.ImageField('Фото', upload_to='posts_images', blank=True)
     pub_date = models.DateTimeField(auto_now_add=False,
                                     verbose_name='Дата и время публикации',
                                     help_text='Если установить дату и время в '
@@ -60,7 +61,7 @@ class Post(PublishedModel, TitleModel, CreatedAtModel):
     )
 
     class Meta:
-        verbose_name = 'публикация'
+        verbose_name = 'Публикация'
         verbose_name_plural = 'Публикации'
 
     def __str__(self):
