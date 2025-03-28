@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+from django.core.paginator import Paginator
 
 from .forms import PostForm, CommentForm, UserForm
 from blog.models import Post, Category, User
@@ -15,8 +16,11 @@ def index(request):
         is_published=True,
         category__is_published=True,
         pub_date__lte=timezone.now()
-    )[:5]
-    context = {'post_list': posts}
+    )
+    paginator = Paginator(posts, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {'page_obj': page_obj}
     return render(request, template, context)
 
 
@@ -45,7 +49,10 @@ def category_posts(request, category_slug):
         is_published=True,
         pub_date__lte=timezone.now()
     )
-    context = {'post_list': posts, 'category': category_list}
+    paginator = Paginator(posts, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {'post_list': page_obj, 'category': category_list}
     return render(request, template, context)
 
 
@@ -75,14 +82,15 @@ def profile(request, username):
         User,
         username=username)
     posts = get_posts(author=profile)
+    paginator = Paginator(posts, 10)
+    page_number = request.GET.get('page')
     if request.user != profile:
         posts = get_posts(
             is_published=True,
             category__is_published=True,
             pub_date__lte=datetime.now(),
             author=profile)
-    # page_obj = get_paginator(request, posts)
-    page_obj = posts
+    page_obj = paginator.get_page(page_number)
     context = {'profile': profile,
                'page_obj': page_obj}
     return render(request, 'blog/profile.html', context)
